@@ -2,7 +2,7 @@
  function createRandomPromise(index) {
     const time = Math.floor(Math.random() * 3) + 1; // 1 to 3 seconds
     const delay = time * 1000;
-
+	const loadingRow = document.getElementById("loading");
     return new Promise((resolve) => {
       const start = performance.now();
       setTimeout(() => {
@@ -25,7 +25,7 @@
     const results = await Promise.all(promises);
 
     // Remove loading row
-    const loadingRow = document.getElementById("loading-row");
+    const loadingRow = document.getElementById("loading");
     if (loadingRow) {
       loadingRow.remove();
     }
