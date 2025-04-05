@@ -1,41 +1,61 @@
 //your JS code here. If required.
-function Random() {
-	return Math.floor(Math.random() * 3) + 1;
-}
+ function createRandomPromise(index) {
+    const time = Math.floor(Math.random() * 3) + 1; // 1 to 3 seconds
+    const delay = time * 1000;
 
-async function Promisetime() {
-	return new Promise((resolve) => {
-		const delay = Random() * 1000;
-		setTimeout(() => {
-			resolve(delay / 1000); // resolve seconds
-		}, delay);
-	});
-}
+    return new Promise((resolve) => {
+      const start = performance.now();
+      setTimeout(() => {
+        const end = performance.now();
+        const timeTaken = ((end - start) / 1000).toFixed(3); // Actual time in seconds
+        resolve({ name: `Promise ${index}`, timeTaken: parseFloat(timeTaken) });
+      }, delay);
+    });
+  }
 
-let a = document.createElement("table");
-document.getElementById("output").append(a);
+  async function runPromises() {
+    const tbody = document.getElementById("output");
 
-async function runExample() {
-	let times = [];
+    const promises = [
+      createRandomPromise(1),
+      createRandomPromise(2),
+      createRandomPromise(3)
+    ];
 
-	for (let i = 1; i <= 3; i++) {
-		let start = performance.now();
-		const result = await Promisetime();
-		let end = performance.now();
+    const results = await Promise.all(promises);
 
-		const timeTaken = ((end - start) / 1000).toFixed(2); // seconds
-		times.push(parseFloat(timeTaken));
+    // Remove loading row
+    const loadingRow = document.getElementById("loading-row");
+    if (loadingRow) {
+      loadingRow.remove();
+    }
 
-		let row = a.insertRow();
-		let cell = row.insertCell();
-		cell.textContent = `Promise${i}: ${timeTaken}s`;
-	}
+    // Populate each promise result
+    results.forEach(result => {
+      const row = document.createElement("tr");
+      const nameCell = document.createElement("td");
+      const timeCell = document.createElement("td");
 
-	// Add final row with max time
-	let maxTime = Math.max(...times).toFixed(2);
-	let finalRow = a.insertRow();
-	let finalCell = finalRow.insertCell();
-	finalCell.textContent = `Total (max) time: ${maxTime}s`;
-}
+      nameCell.textContent = result.name;
+      timeCell.textContent = result.timeTaken;
 
-runExample();
+      row.appendChild(nameCell);
+      row.appendChild(timeCell);
+      tbody.appendChild(row);
+    });
+
+    // Add total row (maximum time taken)
+    const totalRow = document.createElement("tr");
+    const totalLabelCell = document.createElement("td");
+    const totalValueCell = document.createElement("td");
+
+    totalLabelCell.textContent = "Total";
+    const maxTime = Math.max(...results.map(r => r.timeTaken)).toFixed(3);
+    totalValueCell.textContent = maxTime;
+
+    totalRow.appendChild(totalLabelCell);
+    totalRow.appendChild(totalValueCell);
+    tbody.appendChild(totalRow);
+  }
+
+  runPromises();
